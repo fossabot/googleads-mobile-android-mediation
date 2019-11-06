@@ -153,14 +153,22 @@ public final class FacebookAdapter extends FacebookMediationAdapter
         mBannerListener = listener;
         final String placementID = getPlacementID(serverParameters);
 
+        if (adRequest.taggedForChildDirectedTreatment() ==
+                MediationAdRequest.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE) {
+            Log.e(TAG, "Facebook SDK doesn't provide ads for apps or services that are primarily " +
+                    "child-directed.");
+            mBannerListener.onAdFailedToLoad(this, AdRequest.ERROR_CODE_INVALID_REQUEST);
+            return;
+        }
+
         if (TextUtils.isEmpty(placementID)) {
-            Log.e(TAG, "Failed to request ad, placementID is null or empty");
+            Log.e(TAG, "Failed to request ad: placementID is null or empty");
             mBannerListener.onAdFailedToLoad(this, AdRequest.ERROR_CODE_INVALID_REQUEST);
             return;
         }
 
         if (adSize == null) {
-            Log.w(TAG, "Fail to request banner ad, adSize is null");
+            Log.w(TAG, "Fail to request banner ad: adSize is null");
             mBannerListener.onAdFailedToLoad(this, AdRequest.ERROR_CODE_INVALID_REQUEST);
             return;
         }
@@ -177,7 +185,7 @@ public final class FacebookAdapter extends FacebookMediationAdapter
                 new FacebookInitializer.Listener() {
             @Override
             public void onInitializeSuccess() {
-                createAndLoadBannerAd(context, placementID, adSize, adRequest);
+                createAndLoadBannerAd(context, placementID, adSize);
             }
 
             @Override
@@ -207,6 +215,14 @@ public final class FacebookAdapter extends FacebookMediationAdapter
         mInterstitialListener = listener;
         final String placementID = getPlacementID(serverParameters);
 
+        if (adRequest.taggedForChildDirectedTreatment() ==
+                MediationAdRequest.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE) {
+            Log.e(TAG, "Facebook SDK doesn't provide ads for apps or services that are primarily " +
+                    "child-directed.");
+            mInterstitialListener.onAdFailedToLoad(this, AdRequest.ERROR_CODE_INVALID_REQUEST);
+            return;
+        }
+
         if (TextUtils.isEmpty(placementID)) {
             Log.e(TAG, "Failed to request ad, placementID is null or empty");
             mInterstitialListener.onAdFailedToLoad(this, AdRequest.ERROR_CODE_INVALID_REQUEST);
@@ -217,7 +233,7 @@ public final class FacebookAdapter extends FacebookMediationAdapter
                 new FacebookInitializer.Listener() {
             @Override
             public void onInitializeSuccess() {
-                createAndLoadInterstitial(context, placementID, adRequest);
+                createAndLoadInterstitial(context, placementID);
             }
 
             @Override
@@ -248,6 +264,14 @@ public final class FacebookAdapter extends FacebookMediationAdapter
                                 final Bundle mediationExtras) {
         mNativeListener = listener;
         final String placementID = getPlacementID(serverParameters);
+
+        if (mediationAdRequest.taggedForChildDirectedTreatment() ==
+                MediationAdRequest.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE) {
+            Log.e(TAG, "Facebook SDK doesn't provide ads for apps or services that are primarily " +
+                    "child-directed.");
+            mNativeListener.onAdFailedToLoad(this, AdRequest.ERROR_CODE_INVALID_REQUEST);
+            return;
+        }
 
         if (TextUtils.isEmpty(placementID)) {
             Log.e(TAG, "Failed to request ad, placementID is null or empty.");
@@ -312,24 +336,13 @@ public final class FacebookAdapter extends FacebookMediationAdapter
                 return AdRequest.ERROR_CODE_INTERNAL_ERROR;
         }
     }
-
-    private void buildAdRequest(MediationAdRequest adRequest) {
-        if (adRequest != null) {
-            AdSettings.setIsChildDirected((adRequest.taggedForChildDirectedTreatment()
-                    == MediationAdRequest.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE));
-        }
-    }
     //endregion
 
     //region Banner adapter utility classes.
-    private void createAndLoadBannerAd(Context context,
-                                       String placementID,
-                                       AdSize adSize,
-                                       MediationAdRequest adRequest) {
+    private void createAndLoadBannerAd(Context context, String placementID, AdSize adSize) {
         com.facebook.ads.AdSize facebookAdSize = getAdSize(context, adSize);
 
         mAdView = new AdView(context, placementID, facebookAdSize);
-        buildAdRequest(adRequest);
 
         RelativeLayout.LayoutParams adViewLayoutParams = new RelativeLayout.LayoutParams(
                 adSize.getWidthInPixels(context), adSize.getHeightInPixels(context));
@@ -379,11 +392,8 @@ public final class FacebookAdapter extends FacebookMediationAdapter
     //endregion
 
     //region Interstitial adapter utility classes.
-    private void createAndLoadInterstitial(Context context,
-                                           String placementID,
-                                           MediationAdRequest adRequest) {
+    private void createAndLoadInterstitial(Context context, String placementID) {
         mInterstitialAd = new InterstitialAd(context, placementID);
-        buildAdRequest(adRequest);
         mInterstitialAd.loadAd(
                 mInterstitialAd.buildLoadAdConfig()
                         .withAdListener(new InterstitialListener())
@@ -470,7 +480,6 @@ public final class FacebookAdapter extends FacebookMediationAdapter
         }
         if (isNativeBanner) {
             mNativeBannerAd = new NativeBannerAd(context, placementID);
-            buildAdRequest(adRequest);
             mNativeBannerAd.loadAd(
                     mNativeBannerAd.buildLoadAdConfig()
                             .withAdListener(new NativeBannerListener(context, mNativeBannerAd,
@@ -479,7 +488,6 @@ public final class FacebookAdapter extends FacebookMediationAdapter
         } else {
             mMediaView = new MediaView(context);
             mNativeAd = new NativeAd(context, placementID);
-            buildAdRequest(adRequest);
             mNativeAd.loadAd(
                     mNativeAd.buildLoadAdConfig()
                             .withAdListener(new NativeListener(context, mNativeAd, adRequest))

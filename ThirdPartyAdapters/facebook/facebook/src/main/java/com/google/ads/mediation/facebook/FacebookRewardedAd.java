@@ -10,6 +10,7 @@ import com.facebook.ads.AdError;
 import com.facebook.ads.ExtraHints;
 import com.facebook.ads.RewardedVideoAd;
 import com.facebook.ads.RewardedVideoAdExtendedListener;
+import com.google.android.gms.ads.mediation.MediationAdConfiguration;
 import com.google.android.gms.ads.mediation.MediationAdLoadCallback;
 import com.google.android.gms.ads.mediation.MediationRewardedAd;
 import com.google.android.gms.ads.mediation.MediationRewardedAdCallback;
@@ -62,6 +63,17 @@ public class FacebookRewardedAd implements MediationRewardedAd, RewardedVideoAdE
         String decodedBid = adConfiguration.getBidResponse();
         if (!TextUtils.isEmpty(decodedBid)) {
             isRtbAd = true;
+        }
+
+        // Facebook should not bid on open bidding requests that are tagged for child directed
+        // treatment. But if they do, the winning response should be rendered.
+        if (!isRtbAd && adConfiguration.taggedForChildDirectedTreatment() ==
+                MediationAdConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE) {
+            String message = "Facebook SDK doesn't provide ads for apps or services that are " +
+                    "primarily child-directed.";
+            Log.e(TAG, message);
+            mMediationAdLoadCallback.onFailure(message);
+            return;
         }
 
         if (isRtbAd) {
