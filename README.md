@@ -8,6 +8,8 @@ maximize their monetization in native mobile apps.
 This repository is broken into two sections:
 
 ## Mediation Example
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fneo355%2Fgoogleads-mobile-android-mediation.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fneo355%2Fgoogleads-mobile-android-mediation?ref=badge_shield)
+
 
 A sample project demonstrating how an ad network can plug into AdMob Mediation.
 The project contains a "Sample Ad Network" SDK library, as well as a sample
@@ -47,3 +49,6 @@ For feature requests, or to suggest other improvements, please use
 
 ## License
 [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html)
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fneo355%2Fgoogleads-mobile-android-mediation.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fneo355%2Fgoogleads-mobile-android-mediation?ref=badge_large)
